@@ -29,6 +29,7 @@ deploy:
   api_key:
     # Note; this api_key is only valid for staticfloat/IpoptBuilder; you need
     # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+    secure: d0STjPK8ZFlPswJnyw/wd4d41KhbFpmOukyEDCK6Do8a0hlxqQbS8cNNjUozIkFFaVVCZuVze1MviDOSjQLVWA9KIlUmlOPvnPEiH7AuJE7DMJQcEK9sXXGOGHH9dj4UPdJFVWVG7LuGUgPjfZ9JDRS2tpwNfa0Xj81lAImNY7J8HxaG7Gp3QinSHDWN6aoHwcuKecsLCWAfSf8Te1PuR6qRRIRXD0+jUP94K8luDkb3Sh/EkarMLW6CibV41yt9lWepumxAyacO0qEuayIM8SKeHwhsHXK/QGwdMn7vRO22nSvuEmLvBmlHRoqaycmQdbf601FK3DzQB7Nk09MchhTsjkQbbJyL04lCgJAq4QBl/8/ElY22G0IjfQoy0A3qBsYimBGolm/1NfFOVG8ANv0rFX5Kks8UezobsMjpdexvTO9naQ4mMlwVaOXL+dsTSTInmNEB+ikWqeudLFrfGZEIHpH3xr5r1SzycgpZYu1pcBi72soVQTC1UcUIqwqTTgfEX4cI0hPeV78P62PGng01T/Tz+l2NR7AEXyG45DPg1yPhY/PkuJCNbUdXmQY3d5bmnilmTB45Cq2W882Gd4Oddk2xrjQVmkXJe0vkkmFuVaoYd6B/207+x/cDEDsQ3RUeVpAXOE2OA+4TCiKme39pgAB97Ti0/YQlojANCeM=
   file_glob: true
   file: products/*.tar.gz
   skip_cleanup: true
