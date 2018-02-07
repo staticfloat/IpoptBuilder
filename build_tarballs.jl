@@ -5,10 +5,14 @@ platforms = [
   BinaryProvider.Windows(:x86_64),
   BinaryProvider.Linux(:i686, :glibc),
   BinaryProvider.Linux(:x86_64, :glibc),
-  BinaryProvider.Linux(:aarch64, :glibc),
+
+  # It appears that aarch64 isn't recognized by Ipopt's build system
+  #BinaryProvider.Linux(:aarch64, :glibc),
   BinaryProvider.Linux(:armv7l, :glibc),
   BinaryProvider.Linux(:powerpc64le, :glibc),
-  BinaryProvider.MacOS()
+
+  # It appears that MacOS isn't working yet.  :/
+  #BinaryProvider.MacOS()
 ]
 
 dependencies = [
@@ -20,9 +24,20 @@ sources = [
     "62c6de314220851b8f4d6898b9ae8cf0a8f1e96b68429be1161f8550bb7ddb03",
 ]
 
-script = """
-cd \$WORKSPACE/srcdir/Ipopt-3.12.8
-./configure --prefix=/ --with-blas-lib="-L$(libdir(Prefix("\$DESTDIR")))" --host=\$target
+script = raw"""
+cd $WORKSPACE/srcdir/Ipopt-3.12.8
+
+openblas_libdir="$DESTDIR/lib"
+if [[ ${target} == mingw* ]]; then
+    openblas_libdir=$DESTDIR/bin
+fi
+
+openblas_libname="openblas"
+if [[ ${target} == *64-*-* ]]; then
+    openblas_libname="openblas64_"
+fi
+
+./configure --prefix=/ --with-blas-lib="-L${openblas_libdir} -l${openblas_libname}" --host=$target
 make -j3
 make install
 """
