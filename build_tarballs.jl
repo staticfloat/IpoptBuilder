@@ -37,6 +37,7 @@ if [[ ${target} == *64-*-* ]]; then
     openblas_libname="openblas64_"
 fi
 
+./get.Mumps
 ./configure --prefix=/ --with-blas-lib="-L${openblas_libdir} -l${openblas_libname}" --host=$target
 make -j3
 make install
