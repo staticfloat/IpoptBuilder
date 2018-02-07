@@ -16,6 +16,9 @@ env:
     - BINARYBUILDER_AUTOMATIC_APPLE=true
 sudo: required
 
+before_script:
+  - julia -e 'Pkg.add("BinaryBuilder")'
+
 script:
   - julia --color=yes build_tarballs.jl
 
