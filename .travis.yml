@@ -17,7 +17,7 @@ env:
 sudo: required
 
 script:
-  - julia --color=true build_tarballs.jl
+  - julia --color=yes build_tarballs.jl
 
 deploy:
   provider: releases
