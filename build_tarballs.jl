@@ -7,16 +7,11 @@ platforms = [
   BinaryProvider.Linux(:x86_64, :glibc),
 
   # It appears that aarch64 isn't recognized by Ipopt's build system
-  #BinaryProvider.Linux(:aarch64, :glibc),
+  BinaryProvider.Linux(:aarch64, :glibc),
   BinaryProvider.Linux(:armv7l, :glibc),
   BinaryProvider.Linux(:powerpc64le, :glibc),
-
-  # It appears that MacOS isn't working yet.  :/
-  #BinaryProvider.MacOS()
-]
-
-dependencies = [
-    "https://raw.githubusercontent.com/staticfloat/OpenBLASBuilder/master/build.jl",
+  
+  BinaryProvider.MacOS()
 ]
 
 sources = [
@@ -27,18 +22,32 @@ sources = [
 script = raw"""
 cd $WORKSPACE/srcdir/Ipopt-3.12.8
 
-openblas_libdir="$DESTDIR/lib"
-if [[ ${target} == mingw* ]]; then
-    openblas_libdir=$DESTDIR/bin
-fi
+# Get BLAS
+(cd ThirdParty/Blas; \
+    ./get.Blas; \
+    ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
+    make -j3; \
+    make install)
 
-openblas_libname="openblas"
-if [[ ${target} == *64-*-* ]]; then
-    openblas_libname="openblas64_"
-fi
+# Get LAPACK
+(cd ThirdParty/Lapack; \
+    ./get.Lapack; \
+    ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
+    make -j3; \
+    make install)
 
-./get.Mumps
-./configure --prefix=/ --with-blas-lib="-L${openblas_libdir} -l${openblas_libname}" --host=$target
+# Get ASL and Mumps
+(cd ThirdParty/ASL; ./get.ASL)
+(cd ThirdParty/Mumps; ./get.Mumps)
+
+# The Ipopt buildsystem blows up if we use a full path to our AR.
+# By default it is using a tripleted name, so this doesn't actually change anything.
+export AR=$(basename $AR)
+
+# Finally, build Ipopt itself.  For some strange reason, Ipopt's build
+# system doesn't like to find cross-compiled static libraries, so it
+# must be coerced into using them via  `--with-blas` and `--with-lapack`.
+./configure --prefix=$prefix --with-blas="$prefix/lib/libcoinblas.a -lgfortran" --with-lapack="$prefix/lib/libcoinlapack.a" lt_cv_deplibs_check_method=pass_all --host=$target
 make -j3
 make install
 """
@@ -60,5 +69,4 @@ end
 info("Building for $(join(triplet.(build_platforms), ", "))")
 
 
-autobuild(pwd(), "Ipopt", build_platforms, sources, script, products;
-          dependencies=dependencies, verbose=verbose)
+autobuild(pwd(), "Ipopt", build_platforms, sources, script, products; verbose=verbose)
