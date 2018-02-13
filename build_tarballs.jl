@@ -22,9 +22,15 @@ sources = [
 script = raw"""
 cd $WORKSPACE/srcdir/Ipopt-3.12.8
 
+# The Ipopt buildsystem has a very old config.{sub,guess}.  Update those.
+curl -L 'http://git.savannah.gnu.org/cgit/config.git/plain/config.guess' > config.guess
+curl -L 'http://git.savannah.gnu.org/cgit/config.git/plain/config.sub' > config.sub
+
 # Get BLAS
 (cd ThirdParty/Blas; \
     ./get.Blas; \
+    cp ../../config.guess .; \
+    cp ../../config.sub .; \
     ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
     make -j${nproc}; \
     make install)
@@ -32,12 +38,18 @@ cd $WORKSPACE/srcdir/Ipopt-3.12.8
 # Get LAPACK
 (cd ThirdParty/Lapack; \
     ./get.Lapack; \
+    cp ../../config.guess .; \
+    cp ../../config.sub .; \
     ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
     make -j${nproc}; \
     make install)
 
+# Don't download ASL right now, because it crazy broken for cross-compiling. :(
 #(cd ThirdParty/ASL; ./get.ASL)
-(cd ThirdParty/Mumps; ./get.Mumps)
+(cd ThirdParty/Mumps; \
+    ./get.Mumps; \
+    cp ../../config.guess .; \
+    cp ../../config.sub .)
 
 # The Ipopt buildsystem blows up if we use a full path to our AR.
 # By default it is using a tripleted name, so this doesn't actually change anything.
