@@ -26,18 +26,17 @@ cd $WORKSPACE/srcdir/Ipopt-3.12.8
 (cd ThirdParty/Blas; \
     ./get.Blas; \
     ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
-    make -j3; \
+    make -j${nproc}; \
     make install)
 
 # Get LAPACK
 (cd ThirdParty/Lapack; \
     ./get.Lapack; \
     ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
-    make -j3; \
+    make -j${nproc}; \
     make install)
 
-# Get ASL and Mumps
-(cd ThirdParty/ASL; ./get.ASL)
+#(cd ThirdParty/ASL; ./get.ASL)
 (cd ThirdParty/Mumps; ./get.Mumps)
 
 # The Ipopt buildsystem blows up if we use a full path to our AR.
@@ -48,7 +47,7 @@ export AR=$(basename $AR)
 # system doesn't like to find cross-compiled static libraries, so it
 # must be coerced into using them via  `--with-blas` and `--with-lapack`.
 ./configure --prefix=$prefix --with-blas="$prefix/lib/libcoinblas.a -lgfortran" --with-lapack="$prefix/lib/libcoinlapack.a" lt_cv_deplibs_check_method=pass_all --host=$target
-make -j3
+make -j${nproc}
 make install
 """
 
