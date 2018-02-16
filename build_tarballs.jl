@@ -23,6 +23,14 @@ sources = [
 script = raw"""
 set -e
 
+# If we're running on macOS, use clang instead of gcc, and use a reasonable
+# -mmacosx-version-min to get the right C++ ABI defaults for exceptions
+if [[ ${target} == *-apple-* ]]; then
+    export CC=clang
+    export CXX=clang++
+    export LDFLAGS="-mmacosx-version-min=10.8"
+fi
+
 # First, install ASL
 cd $WORKSPACE/srcdir/mp-3.1.0
 
