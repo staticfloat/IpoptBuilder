@@ -49,15 +49,14 @@ cmake -DCMAKE_INSTALL_PREFIX=$prefix \
 
 # Copy over pregenerated files after building arithchk, so as to fake out cmake,
 # because cmake will delete our arith.h
-make arithchk
+make arithchk VERBOSE=1
 mkdir -p src/asl
 cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-1/expr-info.cc ../src/expr-info.cc
 cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-1/arith.h.${target} src/asl/arith.h
-make arith-h
 
 # Build and install ASL
-make -j${nproc}
-make install
+make -j${nproc} VERBOSE=1
+make install VERBOSE=1
 
 # Next, install Ipopt
 cd $WORKSPACE/srcdir/Ipopt-3.12.8
