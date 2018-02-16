@@ -16,8 +16,8 @@ sources = [
     "62c6de314220851b8f4d6898b9ae8cf0a8f1e96b68429be1161f8550bb7ddb03",
     "https://github.com/ampl/mp/archive/3.1.0.tar.gz" =>
     "587c1a88f4c8f57bef95b58a8586956145417c8039f59b1758365ccc5a309ae9",
-    "https://github.com/staticfloat/mp-extra/archive/v3.1.0-1.tar.gz" =>
-    "941ce01d1e86edc7a1fe5eed55aedbc214e9454336c96074d7318d71a14ab5f0",
+    "https://github.com/staticfloat/mp-extra/archive/v3.1.0-2.tar.gz" =>
+    "2f227175437f73d9237d3502aea2b4355b136e29054267ec0678a19b91e9236e",
 ]
 
 script = raw"""
@@ -34,9 +34,10 @@ fi
 # First, install ASL
 cd $WORKSPACE/srcdir/mp-3.1.0
 
-# Remove benchmarking library
+# Remove benchmarking library (this is already done on the latest
+# ampl/mp master branch, but we don't use that, so backport the removal)
 rm -rf thirdparty/benchmark
-patch -p1 < $WORKSPACE/srcdir/mp-extra-3.1.0-1/no_benchmark.patch
+patch -p1 < $WORKSPACE/srcdir/mp-extra-3.1.0-2/no_benchmark.patch
 
 # Build ASL
 mkdir build
@@ -51,8 +52,8 @@ cmake -DCMAKE_INSTALL_PREFIX=$prefix \
 # because cmake will delete our arith.h
 make arithchk VERBOSE=1
 mkdir -p src/asl
-cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-1/expr-info.cc ../src/expr-info.cc
-cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-1/arith.h.${target} src/asl/arith.h
+cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-2/expr-info.cc ../src/expr-info.cc
+cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-2/arith.h.${target} src/asl/arith.h
 
 # Build and install ASL
 make -j${nproc} VERBOSE=1
