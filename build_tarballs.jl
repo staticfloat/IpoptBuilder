@@ -23,14 +23,6 @@ sources = [
 script = raw"""
 set -e
 
-# If we're running on macOS, use clang instead of gcc, and use a reasonable
-# -mmacosx-version-min to get the right C++ ABI defaults for exceptions
-if [[ ${target} == *-apple-* ]]; then
-    export CC=clang
-    export CXX=clang++
-    export LDFLAGS="-mmacosx-version-min=10.8"
-fi
-
 # First, install ASL
 cd $WORKSPACE/srcdir/mp-3.1.0
 
@@ -90,10 +82,6 @@ curl -L 'http://git.savannah.gnu.org/cgit/config.git/plain/config.sub' > config.
     cp ../../config.guess .; \
     cp ../../config.sub .)
 
-# The Ipopt buildsystem blows up if we use a full path to our AR.
-# By default it is using a tripleted name, so this doesn't actually change anything.
-export AR=$(basename $AR)
-
 # Finally, build Ipopt itself.  For some strange reason, Ipopt's build
 # system doesn't like to find cross-compiled static libraries, so it
 # must be coerced into using them via  `--with-blas` and `--with-lapack`.
@@ -109,7 +97,7 @@ make install
 """
 
 products = prefix -> [
-  LibraryProduct(prefix,"libipopt"),
+  LibraryProduct(prefix,"libipopt", :libipopt),
 ]
 
 # Be quiet unless we've passed `--verbose`
