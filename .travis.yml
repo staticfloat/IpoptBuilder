@@ -20,11 +20,17 @@ env:
     - TARGET=i686-linux-gnu
     - TARGET=aarch64-linux-gnu
     - TARGET=arm-linux-gnueabihf
-    - TARGET=powerpc64le-linux-gnu
+    # ppc64le isn't working right now. :(
+    #- TARGET=powerpc64le-linux-gnu
     - TARGET=x86_64-apple-darwin14
     - TARGET=x86_64-w64-mingw32
     - TARGET=i686-w64-mingw32
 sudo: required
+
+jobs:
+  include:
+    - stage: regenerate build.jl
+      script: julia --color=yes build_tarballs.jl --only-buildjl
 
 # Before anything else, get the latest versions of things
 before_script:
@@ -41,7 +47,7 @@ deploy:
     # to make your own: https://docs.travis-ci.com/user/deployment/releases/
     secure: d0STjPK8ZFlPswJnyw/wd4d41KhbFpmOukyEDCK6Do8a0hlxqQbS8cNNjUozIkFFaVVCZuVze1MviDOSjQLVWA9KIlUmlOPvnPEiH7AuJE7DMJQcEK9sXXGOGHH9dj4UPdJFVWVG7LuGUgPjfZ9JDRS2tpwNfa0Xj81lAImNY7J8HxaG7Gp3QinSHDWN6aoHwcuKecsLCWAfSf8Te1PuR6qRRIRXD0+jUP94K8luDkb3Sh/EkarMLW6CibV41yt9lWepumxAyacO0qEuayIM8SKeHwhsHXK/QGwdMn7vRO22nSvuEmLvBmlHRoqaycmQdbf601FK3DzQB7Nk09MchhTsjkQbbJyL04lCgJAq4QBl/8/ElY22G0IjfQoy0A3qBsYimBGolm/1NfFOVG8ANv0rFX5Kks8UezobsMjpdexvTO9naQ4mMlwVaOXL+dsTSTInmNEB+ikWqeudLFrfGZEIHpH3xr5r1SzycgpZYu1pcBi72soVQTC1UcUIqwqTTgfEX4cI0hPeV78P62PGng01T/Tz+l2NR7AEXyG45DPg1yPhY/PkuJCNbUdXmQY3d5bmnilmTB45Cq2W882Gd4Oddk2xrjQVmkXJe0vkkmFuVaoYd6B/207+x/cDEDsQ3RUeVpAXOE2OA+4TCiKme39pgAB97Ti0/YQlojANCeM=
   file_glob: true
-  file: products/*.tar.gz
+  file: products/*
   skip_cleanup: true
   on:
     repo: staticfloat/IpoptBuilder
