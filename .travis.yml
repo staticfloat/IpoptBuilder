@@ -31,6 +31,7 @@ jobs:
   include:
     - stage: regenerate build.jl
       script: julia --color=yes build_tarballs.jl --only-buildjl
+      if: tag IS present
 
 # Before anything else, get the latest versions of things
 before_script:
