@@ -1,6 +1,6 @@
 using BinaryBuilder
 
-# Collection of sources required to build $(state.name)
+# Collection of sources required to build Ipopt
 sources = [
     "https://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.8.tgz" =>
     "62c6de314220851b8f4d6898b9ae8cf0a8f1e96b68429be1161f8550bb7ddb03",
@@ -144,11 +144,12 @@ else
     tag_name = ENV["TRAVIS_TAG"]
     product_hashes = product_hashes_from_github_release(repo_name, tag_name; verbose=verbose)
     bin_path = "https://github.com/$(repo_name)/releases/download/$(tag_name)"
-    print_buildjl(pwd(), products, product_hashes, bin_path)
+    dummy_prefix = Prefix(pwd())
+    print_buildjl(pwd(), products(dummy_prefix), product_hashes, bin_path)
 
     if verbose
         info("Writing out the following reconstructed build.jl:")
-        print_buildjl(STDOUT, product_hashes; products=products, bin_path)
+        print_buildjl(STDOUT, product_hashes; products=products(dummy_prefix), bin_path)
     end
 end
 
