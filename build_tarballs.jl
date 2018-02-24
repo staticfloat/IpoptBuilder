@@ -104,7 +104,7 @@ platforms = [
 # The products that we will ensure are always built
 products(prefix) = [
     LibraryProduct(prefix, "libipopt", :libipopt),
-    ExecutableProduct(prefix, "ampl", :amplexe),
+    ExecutableProduct(prefix, "ipopt", :amplexe),
 ]
 
 # Dependencies that must be installed before this package can be built
