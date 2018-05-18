@@ -4,6 +4,16 @@ using BinaryBuilder
 sources = [
     "https://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.8.tgz" =>
     "62c6de314220851b8f4d6898b9ae8cf0a8f1e96b68429be1161f8550bb7ddb03",
+
+    # Ipopt 3.12.8 uses these particular BLAS/LAPACK/MUMPS dependencies
+    "http://www.coin-or.org/BuildTools/Blas/blas-20130815.tgz" =>
+    "ea87df6dc44829ee0a1733226d130c550b17a0bc51c8dbfcd662fb15520b23b5",
+    "http://www.coin-or.org/BuildTools/Lapack/lapack-3.4.2.tgz" =>
+    "60a65daaf16ec315034675942618a2230521ea7adf85eea788ee54841072faf0",
+    "http://mumps.enseeiht.fr/MUMPS_4.10.0.tar.gz" =>
+    "d0f86f91a74c51a17a2ff1be9c9cee2338976f13a6d00896ba5b43a5ca05d933",
+    
+    # ASL sources
     "https://github.com/ampl/mp/archive/3.1.0.tar.gz" =>
     "587c1a88f4c8f57bef95b58a8586956145417c8039f59b1758365ccc5a309ae9",
     "https://github.com/staticfloat/mp-extra/archive/v3.1.0-2.tar.gz" =>
@@ -42,47 +52,55 @@ cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-2/arith.h.${target} src/asl/arith.h
 make -j${nproc} VERBOSE=1
 make install VERBOSE=1
 
+
+# Install Third-Party sources as Ipopt desires...
+cd $WORKSPACE/srcdir/Ipopt-*/ThirdParty
+cp -r $WORKSPACE/srcdir/BLAS/*.f ./Blas/
+cp -r $WORKSPACE/srcdir/lapack-* ./Lapack/LAPACK
+cp -r $WORKSPACE/srcdir/MUMPS_* ./Mumps/MUMPS
+
 # Next, install Ipopt
-cd $WORKSPACE/srcdir/Ipopt-3.12.8
+cd $WORKSPACE/srcdir/Ipopt-*
 
 # The Ipopt buildsystem has a very old config.{sub,guess}.  Update those.
-curl -L 'http://git.savannah.gnu.org/cgit/config.git/plain/config.guess' > config.guess
-curl -L 'http://git.savannah.gnu.org/cgit/config.git/plain/config.sub' > config.sub
+update_configure_scripts
 
-# Get BLAS
+# Build BLAS
 (cd ThirdParty/Blas; \
-    ./get.Blas; \
-    cp ../../config.guess .; \
-    cp ../../config.sub .; \
     ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
     make -j${nproc}; \
     make install)
 
-# Get LAPACK
+# Build LAPACK
 (cd ThirdParty/Lapack; \
-    ./get.Lapack; \
-    cp ../../config.guess .; \
-    cp ../../config.sub .; \
     ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
     make -j${nproc}; \
     make install)
 
-# Download a much newer version of ASL than we would otherwise get through Ipopt
 (cd ThirdParty/Mumps; \
-    ./get.Mumps; \
-    cp ../../config.guess .; \
-    cp ../../config.sub .)
+    patch -p0 < mumps.patch; \
+    patch -p0 < mumps_mpi.patch; \
+    mv MUMPS/libseq/mpi.h MUMPS/libseq/mumps_mpi.h; \
+    ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
+    make -j${nproc}; \
+    make install)
 
-# Finally, build Ipopt itself.  For some strange reason, Ipopt's build
-# system doesn't like to find cross-compiled static libraries, so it
-# must be coerced into using them via  `--with-blas` and `--with-lapack`.
+# Finally, build Ipopt itself.  Ipopt does some unusual things with pkg-config
+# paths that don't play well with our definition of PKG_CONFIG_SYSROOT_DIR, so
+# we have to define --with-mumps-incdir.  And we do so with extreme prejudice,
+# and an extra helping of flag-injection hackiness.  We also need to give it
+# asl since it doesn't know how to look for our updated asl automatically.
 ./configure --prefix=$prefix \
-            --with-blas="$prefix/lib/libcoinblas.a -lgfortran" \
-            --with-lapack="$prefix/lib/libcoinlapack.a" \
+            lt_cv_deplibs_check_method=pass_all \
+            --with-mumps-incdir="$(pwd)/ThirdParty/Mumps/MUMPS/include -I$(pwd)/ThirdParty/Mumps/MUMPS/libseq -DCOIN_USE_MUMPS_MPI_H" \
+            --with-mumps-lib="-L$(pwd)/ThirdParty/Mumps/MUMPS/.libs -lcoinmumps" \
             --with-asl-lib="$prefix/lib/libasl.a" \
             --with-asl-incdir="$prefix/include/asl" \
-            lt_cv_deplibs_check_method=pass_all \
             --host=$target
+            
+            #--with-blas="$prefix/lib/libcoinblas.a -lgfortran" \
+            #--with-lapack="$prefix/lib/libcoinlapack.a" \
+
 make -j${nproc}
 make install
 """
