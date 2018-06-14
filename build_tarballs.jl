@@ -41,9 +41,9 @@ cmake -DCMAKE_INSTALL_PREFIX=$prefix \
       -DRUN_HAVE_STEADY_CLOCK=0 \
       ../
 
-# Copy over pregenerated files after building arithchk, so as to fake out cmake,
+# Copy over pregenerated files after building arith-h, so as to fake out cmake,
 # because cmake will delete our arith.h
-make arithchk VERBOSE=1
+make -j${nproc} arith-h > /dev/null || true
 mkdir -p src/asl
 cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-2/expr-info.cc ../src/expr-info.cc
 cp -v $WORKSPACE/srcdir/mp-extra-3.1.0-2/arith.h.${target} src/asl/arith.h
