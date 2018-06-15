@@ -81,7 +81,7 @@ update_configure_scripts
     patch -p0 < mumps.patch; \
     patch -p0 < mumps_mpi.patch; \
     mv MUMPS/libseq/mpi.h MUMPS/libseq/mumps_mpi.h; \
-    ./configure --prefix=$prefix --disable-shared --with-pic --host=$target; \
+    ./configure --prefix=$prefix --enable-shared --with-pic --host=$target; \
     make -j${nproc}; \
     make install)
 
@@ -93,7 +93,7 @@ update_configure_scripts
 ./configure --prefix=$prefix \
             lt_cv_deplibs_check_method=pass_all \
             --with-mumps-incdir="$(pwd)/ThirdParty/Mumps/MUMPS/include -I$(pwd)/ThirdParty/Mumps/MUMPS/libseq -DCOIN_USE_MUMPS_MPI_H" \
-            --with-mumps-lib="-L$(pwd)/ThirdParty/Mumps/MUMPS/.libs -lcoinmumps" \
+            --with-mumps-lib="-L${prefix}/lib -lcoinmumps" \
             --with-asl-lib="$prefix/lib/libasl.a" \
             --with-asl-incdir="$prefix/include/asl" \
             --host=$target
